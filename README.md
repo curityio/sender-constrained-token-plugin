@@ -12,7 +12,7 @@ The client certificate used in API requests must then match that used at the tim
 
 ## Plugin
 
-This plugin makes the above token binding checks in an NGINX based reverse proxy, so that the API does not have to.
+This plugin makes the above token binding checks in an NGINX based reverse proxy, so that the API does not have to.\
 See the following resources for further information on this design pattern:
 
 - [Reverse Proxy Setup for Mutual TLS APIs]()
