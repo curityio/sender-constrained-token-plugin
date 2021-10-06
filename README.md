@@ -12,7 +12,7 @@ The client certificate used in API requests must then match that used at the tim
 
 ## Plugin
 
-This plugin makes the above token binding checks in an NGINX based reverse proxy, to reduce API work.\
+This plugin makes the above token binding checks in an NGINX based reverse proxy.\
 See the following article for further details on how this plugin is used:
 
 - [Mutual TLS APIs Code Example](https://curity.io/resources/learn/mutual-tls-api/)
