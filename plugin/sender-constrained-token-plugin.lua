@@ -5,7 +5,6 @@
 local _M = {}
 local b64 = require 'ngx.base64'
 local ssl = require 'ngx.ssl'
-local pl_stringx = require 'pl.stringx'
 local jwt = require 'resty.jwt'
 local sha256 = require 'resty.sha256'
 local str = require 'resty.string'
@@ -65,35 +64,34 @@ function _M.execute(config)
         error_response(ngx.HTTP_INTERNAL_SERVER_ERROR, 'server_error', 'Problem encountered processing the request')
     end
 
-    -- By this time the access token should be available as a JWT
-    local access_token = ngx.req.get_headers()['Authorization']
-    if access_token then
-        access_token = pl_stringx.replace(access_token, 'Bearer ', '', 1)
-    end
+    local auth_header = ngx.req.get_headers()['Authorization']
+    if auth_header and string.len(auth_header) > 7 and string.lower(string.sub(auth_header, 1, 7)) == 'bearer ' then
 
-    if not access_token then
-        ngx.log(ngx.WARN, 'No access token was found in the Authorization bearer header')
-        unauthorized_error_response()
-    end
+        local access_token = string.sub(auth_header, 8)
 
-    -- We should also have a client certificate
-    if ngx.var.ssl_client_escaped_cert == nil then
-        ngx.log(ngx.WARN, 'The request did not contain a valid client certificate')
-        unauthorized_error_response()
-    end
+        -- Get the client certificate
+        if ngx.var.ssl_client_escaped_cert == nil then
+            ngx.log(ngx.WARN, 'The request did not contain a valid client certificate')
+            unauthorized_error_response()
+        end
 
-    -- Read the thumbprint
-    local jwtThumbprint = read_token_thumbprint(access_token)
-    if jwtThumbprint == nil then
-        ngx.log(ngx.WARN, 'Unable to parse the x5t#S256 from the received JWT access token')
-        unauthorized_error_response()
-    end
+        -- Read the thumbprint
+        local jwtThumbprint = read_token_thumbprint(access_token)
+        if jwtThumbprint == nil then
+            ngx.log(ngx.WARN, 'Unable to parse the x5t#S256 from the received JWT access token')
+            unauthorized_error_response()
+        end
 
-    -- Calculate the SHA256 hash of the client certificate and check it matches that in the JWT
-    local certThumbprint = get_sha256_thumbprint(ngx.var.ssl_client_raw_cert)
-    if certThumbprint ~= jwtThumbprint then
-        ngx.log(ngx.WARN, 'The client certificate details of the request and the JWT do not match')
-        unauthorized_error_response()
+        -- Calculate the SHA256 hash of the client certificate and check it matches that in the JWT
+        local certThumbprint = get_sha256_thumbprint(ngx.var.ssl_client_raw_cert)
+        if certThumbprint ~= jwtThumbprint then
+            ngx.log(ngx.WARN, 'The client certificate details of the request and the JWT do not match')
+            unauthorized_error_response()
+        end
+
+    else
+        ngx.log(ngx.WARN, 'No valid access token was found in the HTTP Authorization header')
+        unauthorized_error_response(config)
     end
 end
 
