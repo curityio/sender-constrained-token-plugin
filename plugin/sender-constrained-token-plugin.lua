@@ -1,5 +1,5 @@
 --
--- A LUA module to verify token binding for a JWT sent via a Mutual TLS connection
+-- A LUA module to verify the sender constrained token binding for a JWT sent via a Mutual TLS connection
 --
 
 local _M = {}
