@@ -32,18 +32,18 @@ end
 -- Parse the JWT and retrieve the cnf/x5t#S256 claim issued at the time of authentication
 --
 local function read_token_thumbprint(jwt_text)
-    
+
     local jwt = jwt:load_jwt(jwt_text)
     if jwt.valid and jwt.payload.cnf and jwt.payload.cnf['x5t#S256'] then
         return jwt.payload.cnf['x5t#S256']
     end
-    
+
     return nil
 end
 
 --
 -- Calculate the SHA256 hash of the client certificate received via Mutual TLS
--- https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.8
+-- https://www.rfc-editor.org/rfc/rfc8705.html#section-3.1
 --
 local function get_sha256_thumbprint(certificate)
 
