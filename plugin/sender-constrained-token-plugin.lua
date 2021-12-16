@@ -65,7 +65,7 @@ function _M.execute(config)
     end
 
     local auth_header = ngx.req.get_headers()['Authorization']
-    if auth_header and string.len(auth_header) > 7 and string.sub(auth_header, 1, 7) == 'Bearer ' then
+    if auth_header and string.len(auth_header) > 7 and string.lower(string.sub(auth_header, 1, 7)) == 'bearer ' then
 
         local access_token = string.sub(auth_header, 8)
 
